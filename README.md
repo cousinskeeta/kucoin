@@ -19,6 +19,7 @@ Built in methods will preprocess the data and calculate the Relative Stregnth In
     client.get_rsi_data()
 
 Methods will also build graphs for each asset. 
+
     client.plot_rsi_data()
     client.save_candlesticks()
 
