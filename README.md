@@ -1,5 +1,5 @@
 # KuCoin - Coin Data Scraper
-The coinscraper client was desinged to compare the top 400 supported assets on Kucoin's decentralized exchange. Each asset's historical and fundamental data is sourced from coinmarketcap.com.  
+The coinscraper client was desinged to compare the top 200 supported assets on Kucoin's decentralized exchange. Each asset's historical and fundamental data is sourced from coinmarketcap.com.  
 
 The client has a few requirements/dependecies, please see requirements.txt file.  To install the client, download the .py file and the demo notebook for Google Colab.
 
