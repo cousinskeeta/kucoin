@@ -1,20 +1,21 @@
 # KuCoin - Coin Data Scraper
-The coinscraper client was desinged to compare the top 400 supported assets on Kucoin's decentralized exchange. Each asset's historical and fundamental data is sourced from coinmarketcap.com.  
+The coinscraper client was desigged to compare the top 200 supported assets on Kucoin's decentralized exchange. Each asset's historical and fundamental data is sourced from coinmarketcap.com.  
 
-The client has a few requirements/dependecies, please see requirements.txt file.  To install the client, download the .py file.
+The client has a few requirements/dependecies, please see requirements.txt file.  To install the client, download the .py file and the demo notebook for Google Colab.
 
 ## Connecting to Client 
+<code Python>
     from coinscraper import coinscrapper
     today = 'YYYYMMDD'
     client = coinscrapper(today)
-
+</code>
 The client will require google authentication, and will also require selenium webdriver. I would suggest running this client in google colab to test it out. Feel free to comment out or change any functionality.
 
 ## Pulling Summary
 The .summary() method will be a generate.csv file with all the assets summaries.
-
+<code Python>
     client.summary()
-
+<code>
 ## Access Saved Variables
 Using the client we can access the variables saved during the summary process. The variables will each contain a list relevant to each asset identified on CoinMarketCap.com under the KuCoin Exchange.
 
@@ -27,7 +28,7 @@ Using the client we can access the variables saved during the summary process. T
 7. client.kucoin_list
 
 Below is an example of how to access these variables using the client.
-
+<code Python>
     [42]
     variables = [client.todays_date, client.names, client.todays_price, client.todays_RSI, client.marketcaps, client.volumes, client.kucoin_list]
     for each in variables:
@@ -40,7 +41,7 @@ Below is an example of how to access these variables using the client.
     # Closing Price for Each Asset
     print('Latest Price: ', client.todays_price)
     # 14 Day RSI as of Today
-
+</code>
 ## Access Saved Datasets
 Using the client we can also access the datasets saved during the summary process. The datasets are saved in a python list, and will contain historic data for each asset. The fundamental data and the RSI dataset are separte pythonic lists of datasets.
 
@@ -49,6 +50,7 @@ Using the client we can also access the datasets saved during the summary proces
 3. client.rsi_data
 
 Below is an example of how to access the saved datasets using the client.
+<code Python>
     [47]
     # Historic Price Data
     list_of_historic_data = client.technical_data 
@@ -58,19 +60,19 @@ Below is an example of how to access the saved datasets using the client.
     list_of_fundamental_data = client.fundamental_data 
     print('\nFundamental Data: \n')
     display(list_of_fundamental_data[0].set_index(0).stack())
-
+</code>
 ## Access RSI Charts
 Using the client we can access the RSI Charts saved during the summary process. The charts are saved in a python list, and also saved to your authenticated google drive. The plots are the matplotlib objects that just require the .show() method.
 
 1. client.plots
 2. client.candle_sticks (coming soon)
 Below is an example of how to access the saved datasets using the client.
-
+<code Python>
     [50]
     list_of_charts = client.plots
     for i in list_of_charts:
     i.show()
-    
+</code>  
 ## Access the Log File
 Using the client we can also access the log file saved during the summary process. The log file is a text file that shows which processes are running, or errors that occur.
 
