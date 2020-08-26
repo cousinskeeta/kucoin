@@ -13,9 +13,9 @@ import pandas as pd
 from coinscraper import coinscrapper
 
 app = Flask(__name__, static_folder='data')
-
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'this_should_be_configured')
-
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 
+'password')
+app.config['DATA'] = 'data/images'
 global now 
 now = date.today()
 
@@ -37,7 +37,8 @@ print(type(client))
 @app.route('/home')
 def home():
     """Render website's home page."""
-    return render_template('home.html', date="", top10="",table="", assets="",tables="")
+    return render_template('home.html', date="", top10="",table="", 
+    assets="",tables="", preds="", tables_="")
 
 @app.route('/scrape_coins', methods=['GET','POST'])
 def scrape_coins():
@@ -45,15 +46,20 @@ def scrape_coins():
 	table = [summary.head(10).to_html(classes='data', header="true")]
 	tables = [summary.to_html(classes='data', header="true")]
 
-	return render_template('home.html', date=date, top10="Here are our top 10 picks for:\n",table=table, assets="Here all the assets we assessed:\n",tables=tables )
+	return render_template('home.html', date=date, 
+    top10="Here are our top 10 picks for:\n",table=table, 
+    assets="Here all the assets we assessed:\n",tables=tables )
 
 @app.route('/update', methods=['GET','POST'])
 def update():
     updated = client.summary()
     date = now
+    updated.sort_values('RSI').to_csv(f'summary-{now}.csv')
     table = [updated.head().to_html(classes='data', header="true")]
-    tables = [updated.head().to_html(classes='data', header="true")]
-    return render_template('home.html', date=date, top10="Here are our top 10 picks for:\n",table=table, assets="Here all the assets we assessed:\n",tables=tables )
+    tables = [updated.to_html(classes='data', header="true")]
+    return render_template('home.html', date=date, 
+    top10="Here are our top 10 picks for:\n",table=table, 
+    assets="Here all the assets we assessed:\n",tables=tables )
 
 
 @app.route('/preds',methods=['GET','POST'])
@@ -65,12 +71,11 @@ def preds():
     print(name)
     res = client.prediction(name)
     print(res)
-    table = res[2]
-    print(table)
-    tables = res[3]
-    print(tables)
-
-    return render_template('home.html', date=date, top10="Here is our prediction:",table=table, assets="Here a visual chart:\n",tables=tables )
+    preds = res[2]
+    print("Predictions: ",preds)
+    tables_ = [res[0].head().to_html(classes='data', header="true")]
+    print("Table: ", tables_)
+    return render_template('home.html', date=date, top10="Here is our prediction:",preds=preds, assets="Here a table:\n",tables=tables_ )
 
 
 ###

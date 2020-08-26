@@ -1,0 +1,98 @@
+<html>
+	<head>
+		<script>
+			const config = {
+			  sourceAssetAddress: null,
+			  sourceAmountDecimal: null,
+			  destinationAssetAddress: null,
+			  destinationAmountDecimal: null,
+			  apiKey: null,
+			  partnerContractAddress: "0x7581d6b7d0d75d0db28094be6b5ee69e012661dd",
+			};
+			const nodeId = 'totle-widget';
+			!function(){const t=document.createElement("script");t.type="text/javascript";const e=()=>{TotleWidget.default.run(config,document.getElementById(nodeId))};t.readyState?t.onreadystatechange=function(){"loaded"!=t.readyState&&"complete"!=t.readyState||(t.onreadystatechange=null,e())}:t.onload=function(){e()},t.src="https://widget.totle.com/latest/dist.js",document.getElementsByTagName("head")[0].appendChild(t)}();
+		</script>
+
+		<style>
+			/* This only works with JavaScript, 
+			if it's not present, don't show loader */
+			.no-js #loader { display: none;  }
+			.js #loader { display: block; position: absolute; left: 100px; top: 0; }
+		</style>
+
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+		
+		<script src="https://github.com/Modernizr/Modernizr/raw/master/modernizr.js"></script>
+		<script>
+			// Wait for window load
+			$(window).load(function() {
+				// Animate loader off screen
+				$("#loader").animate({
+					top: -200
+				}, 1500);
+			});
+		</script>	
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+	</head>
+	<body>
+		<h1><center>Coin RSI Scrapper - Top Picks</center></h1>
+		<br>
+		<br>
+		<form action="{{ url_for('scrape_coins') }}" method="post">
+			<center><h3> Click to view saved ranks </h3></center>
+				<br>
+			<center><button id="run"> Run </button></center>
+		</form>
+		<form action="{{ url_for('update') }}" method="post">
+			<center><h3> Click to update ranks </h3>
+			This will take about 30 minutes to connect</center>
+				<br>
+			<center><button id="update"> Update </button></center>
+		</form>
+		<br>
+		<center><h2> You can swap some crypto tokens while you wait!</h2></center>
+		<br>
+		<center>
+			<div id='totle-widget'></div>
+		</center>
+		<br>
+		<center><h3> <span id='top10'> {{top10}}</span></h3></center>
+		<center><h4><span id='date'>{{date}}</span></h4></center>
+		<br>
+		<center>
+			{% for tab in table %}
+				{{ tab|safe }}
+			{% endfor %}
+		</center>
+
+		<br>
+		<form action="{{ url_for('preds') }}" method="post">
+			<center><h3> Enter URL of historic data for predictions: </h3></center>
+			<center><input type="text" id="url" name="url"></center>
+				<br>
+			<center><button id="preds"> Predict </button></center>
+		</form>
+		<br>
+		<center>
+				{{ preds }}
+		</center>
+		<br>
+		<center><h3> <span id= 'all'>{{assets}}</span></h3></center>
+		<center><h4><span id='date'>{{date}}</span></h4></center>
+		<center>
+			{% for tab in tables %}
+				{{ tab|safe }}
+			{% endfor %}
+		</center>		
+		<center>
+			{% for tab in tables_ %}
+				{{ tab }}
+			{% endfor %}
+		</center>	
+		
+		<br>
+	</body>
+
+</html>
+

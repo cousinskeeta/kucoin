@@ -5,6 +5,9 @@ import datetime
 from sklearn.preprocessing import StandardScaler
 import requests
 import pickle 
+import math
+from sklearn.metrics import r2_score
+from sklearn.metrics import mean_squared_error
 
 class predict_(object):
     asset = ""
@@ -41,6 +44,7 @@ class predict_(object):
             test = pd.read_html(crypto_url.text)
             targets = ["Open*", "High","Low","Close**","Volume", "Market Cap"]
             dff = test[2].copy()
+            print("Dimensionality: ", dff.shape)
         date_range= pd.Series([i + pd.offsets.Day() for i in pd.date_range(today, freq='D', periods=per)])
         pbar = tqdm(total=len(date_range)+1)
 
@@ -64,59 +68,55 @@ class predict_(object):
                 a = forecasts[0].values
                 b = forecasts[-1].values
 
-            if b > a:
-                pch = 100 * ((b - a) / a )
-                resp="""
-                Price is predicted to increase over the next {} days !!! \n
-                We forecast a {}% increase in {} from {} to {}, or ${}. \n
-                Here's a graph showing the anticipated high / low ranges.
-                """.format(len(date_range), round(pch[0],2), name, 
-                        round(a[0],2), round(b[0],2), round(b[0]-a[0],2))
-                print("""
-                Price is predicted to increase over the next {} days !!! \n
-                We forecast a {}% increase in {} from {} to {}, or ${}. \n
-                Here's a graph showing the anticipated high / low ranges.
-                """.format(len(date_range), round(pch[0],2), name, 
-                        round(a[0],2), round(b[0],2), round(b[0]-a[0],2)))
-            else:
-                pch = 100 * ((b - a) / a )
-                resp = """
-                Price is predicted to decrease over the next {} days !!! \n
-                We forecast a {}% decrease in {} from {} to {}, or $({}). \n
-                Here's a graph showing the anticipated high / low ranges.
-                """.format(len(date_range), round(pch[0],2), name, 
-                        round(a[0],2), round(b[0],2), round(b[0]-a[0],2))
-                print("""
-                Price is predicted to decrease over the next {} days !!! \n
-                We forecast a {}% decrease in {} from {} to {}, or $({}). \n
-                Here's a graph showing the anticipated high / low ranges.
-                """.format(len(date_range), round(pch[0],2), name, 
-                        round(a[0],2), round(b[0],2), round(b[0]-a[0],2)))
+                if b > a:
+                    pch = 100 * ((b - a) / a )
+                    resp="""
+                    Price is predicted to increase over the next {} days !!! \n
+                    We forecast a {}% increase in {} from {} to {}, or ${}. URL: {}\n
+                    """.format(len(date_range), round(pch[0],2), name.split('/')[4], 
+                            round(a[0],2), round(b[0],2), round(b[0]-a[0],2), name)
+                    print("""
+                    Price is predicted to increase over the next {} days !!! \n
+                    We forecast a {}% increase in {} from {} to {}, or ${}. URL: {}\n
+                    """.format(len(date_range), round(pch[0],2), name.split('/')[4], 
+                            round(a[0],2), round(b[0],2), round(b[0]-a[0],2), name))
+                else:
+                    pch = 100 * ((b - a) / a )
+                    resp = """
+                    Price is predicted to decrease over the next {} days !!! \n
+                    We forecast a {}% decrease in {} from {} to {}, or $({}). URL: {}\n
+                    """.format(len(date_range), round(pch[0],2), name.split('/')[4], 
+                            round(a[0],2), round(b[0],2), round(b[0]-a[0],2), name)
+                    print("""
+                    Price is predicted to decrease over the next {} days !!! \n
+                    We forecast a {}% decrease in {} from {} to {}, or $({}). URL: {}\n
+                    """.format(len(date_range), round(pch[0],2), name.split('/')[4], 
+                            round(a[0],2), round(b[0],2), round(b[0]-a[0],2)))
 
 
-            import matplotlib.pyplot as plt
-            import seaborn as sns
-            sns.set_style("whitegrid")
-            print(coin)
-            plt.figure(figsize=(16,9))
-            plt.plot(date_range, da['Close**'][-per:], label='Projection', color = "k")
-            plt.plot(date_range, da['High'][-per:], label='Projected High', color='r')
-            plt.plot(date_range, da['Low'][-per:], label='Projected Low', color='g')
-            kwargs = {"color":'b', 'alpha':.1, 'label':['Range: High/Low']}
-            plt.fill_between(date_range, da['High'][-per:], da['Low'][-per:], **kwargs)
-            plt.title(f"Close Price - {per} Day Projection")
-            plt.xticks(date_range, date_range)
-            plt.ylabel('Price')
-            plt.xlabel('Date')
-            plt.legend()
-            # plt.show();
-            dest = '/data/img/{name}.jpeg'
-            plt.savefig(dest, dpi=72)
-            # display(da.tail(per))
-            pbar.close()
-            return [da, pch, resp, dest]
+                # import matplotlib.pyplot as plt
+                # import seaborn as sns
+                # sns.set_style("whitegrid")
+                # print(coin)
+                # plt.figure(figsize=(16,9))
+                # plt.plot(date_range, da['Close**'][-per:], label='Projection', color = "k")
+                # plt.plot(date_range, da['High'][-per:], label='Projected High', color='r')
+                # plt.plot(date_range, da['Low'][-per:], label='Projected Low', color='g')
+                # kwargs = {"color":'b', 'alpha':.1, 'label':['Range: High/Low']}
+                # plt.fill_between(date_range, da['High'][-per:], da['Low'][-per:], **kwargs)
+                # plt.title(f"Close Price - {per} Day Projection")
+                # plt.xticks(date_range, date_range)
+                # plt.ylabel('Price')
+                # plt.xlabel('Date')
+                # plt.legend()
+                # # plt.show();
+                # dest = '{name}.jpeg'
+                # plt.savefig(dest, dpi=72)
+                # display(da.tail(per))
+                pbar.close()
+                return [da, pch, resp] #dest
 
-    def predict(self, data=pd.DataFrame(), targets=[], verbose = True, predictions = {}, asset= name, j = 0):
+    def predict(self, data=pd.DataFrame(), targets=[], verbose = False, predictions = {}, asset= name, j = 0):
         predictions = {}
         data = data
         targets=targets
@@ -310,7 +310,7 @@ class predict_(object):
         e = final
 
         ## checking and removing Null values
-        e.dropna(axis=1, inplace=True)
+        e.fillna(0,axis=1, inplace=True)
 
         ## month and day features
         e['Month'] = e.index.month
@@ -342,7 +342,13 @@ class predict_(object):
         # drive.mount('/content/drive', force_remount=True)
         j=j
         train_X = X
+        print("Train_X dtype: ", type(train_X))
+        print(train_X)
+
         train_y = y
+        print("Train_X dtype: ", type(train_y))
+        print(train_y)
+
         verbose = verbose
         data = data
         drop= drop
@@ -358,20 +364,25 @@ class predict_(object):
         # Lasso Regression
         starting = time.time()
         model_name.append("Lasso")
-        save_name = f"{asset}-{drop[:2]}-Lasso-Model"
+        save_name = f"{drop[:2]}-Lasso-Model"
         print(save_name+".p")
         from pathlib import Path
-        p = Path(f"/data/models/{save_name}.p")
+        p = Path(f"{save_name}.p")
         
         if p.exists() and j == 0:
             print(f'Loading{save_name}...')
-            lasso = pickle.load( open(f"/data/models/{save_name}.p", "rb" ) )
+            lasso = pickle.load( open(f"{save_name}.p", "rb" ) )
+            
+            if train_X.isnull().sum().sum() > 0:
+                train_X.fillna(0, axis=1, inplace=True)
             lasso.fit(train_X, train_y)
 
-            y_pred = lasso.predict(train_X[-1].reshape(1,-1))  # Making prediction based on last day info
+            print('prediction:',train_X[-1:0])
+
+            y_pred = lasso.predict(train_X[-1:]) #.reshape(1,-1))  # Making prediction based on last day info
             model_preds.append(y_pred[-1])
             
-            filename = f'/data/models/{save_name}.p'
+            filename = f'{save_name}.p'
             pickle.dump(lasso, open(filename, 'wb'))
             
             from sklearn.metrics import mean_squared_error # Metrics for the model
@@ -387,7 +398,10 @@ class predict_(object):
             model_times.append(elapsed)
         elif p.exists() and j>0:
             print(f'Loading{save_name}...')
-            ridge = pickle.load( open(f"/data/models/{save_name}.p", "rb" ) )
+            ridge = pickle.load( open(f"{save_name}.p", "rb" ) )
+            
+            if train_X.isnull().sum().sum() > 0:
+                train_X.fillna(0, axis=1, inplace=True)
             ridge.fit(train_X, train_y)
 
             y_pred = ridge.predict(train_X[-1:])  # Making prediction based on last day info
@@ -406,9 +420,7 @@ class predict_(object):
             model_times.append(elapsed) 
         else:
             print(f'Could not find {save_name}...\nCreating new model for future usage...')
-            import math
-            from sklearn.metrics import r2_score
-            from sklearn.metrics import mean_squared_error
+            print("Loaded: Scikit-Learn")
             model_names = []
             scores = []
             r2s = []
@@ -417,7 +429,8 @@ class predict_(object):
             times = []
 
             n_train = 500
-            n_records = len(X)
+            n_records = len(train_X)
+            print(len(train_X))
             from sklearn.linear_model import LassoLars
             lasso = LassoLars()  
 
@@ -432,6 +445,8 @@ class predict_(object):
                 print('Xtrain=%d, Xtest=%d' % (len(X_train), len(X_test)))
                 print('ytrain=%d, ytest=%d' % (len(y_train), len(y_test)))
                 
+                if X_train.isnull().sum().sum() > 0:
+                    X_train.fillna(0, axis=1, inplace=True)
                 lasso.fit(X_train, y_train)
 
                 y_pred = lasso.predict(X_test)
@@ -462,15 +477,19 @@ class predict_(object):
             metrics_['MSE'] = mses
             metrics_['RMSE'] = rmses
             metrics_['Time'] = model_times
+            print(metrics.head(3), metrics.tail(3))
 
             # display(metrics_.head())
-            lasso.fit(train_X, train_y)
+            if train_X.isnull().sum().sum() > 0:
+                train_X.fillna(0, axis=1, inplace=True)
+            lasso.fit(train_X,train_y)
             y_pred = lasso.predict(train_X[-1:])  # Making prediction based on last day info
             model_preds.append(y_pred[-1])
             
-            filename = f'/data/models/{save_name}.p'
+            # saving data
+            filename = f'{name}-{save_name}.p'
             pickle.dump(lasso, open(filename, 'wb'))
-            metrics_.to_pickle(f'/data/models/{save_name}-metrics.p')
+            metrics_.to_pickle(f'{save_name}-metrics.p')
             
             from sklearn.metrics import mean_squared_error # Metrics for the model
             y_true = data[drop].values[-1:]
@@ -488,20 +507,22 @@ class predict_(object):
         from sklearn.linear_model import LinearRegression 
         starting = time.time()
         model_name.append("Linear")
-        save_name = f"{asset}-{drop[:2]}-Linear-Model"
+        save_name = f"{drop[:2]}-Linear-Model"
         print(save_name)
         from pathlib import Path
-        p = Path(f"/data/models/{save_name}.p")
+        p = Path(f"{save_name}.p")
         
         if p.exists() and j == 0:
             print(f'Loading{save_name}...')
-            linear = pickle.load( open(f"/data/models/{save_name}.p", "rb" ) )
+            linear = pickle.load( open(f"{save_name}.p", "rb" ) )
+            if train_X.isnull().sum().sum() > 0:
+                train_X.fillna(0, axis=1, inplace=True)
             linear.fit(train_X, train_y)
 
             y_pred = linear.predict(train_X[-1:])  # Making prediction based on last day info
             model_preds.append(y_pred[-1])
             
-            filename = f'/data/models/{save_name}.p'
+            filename = f'{save_name}.p'
             pickle.dump(linear, open(filename, 'wb'))
             
             from sklearn.metrics import mean_squared_error # Metrics for the model
@@ -517,7 +538,9 @@ class predict_(object):
             model_times.append(elapsed)  
         elif p.exists() and j > 0:
             print(f'Loading{save_name}...')
-            ridge = pickle.load( open(f"/data/models/{save_name}.p", "rb" ) )
+            ridge = pickle.load( open(f"{save_name}.p", "rb" ) )
+            if train_X.isnull().sum().sum() > 0:
+                train_X.fillna(0, axis=1, inplace=True)
             ridge.fit(train_X, train_y)
 
             y_pred = ridge.predict(train_X[-1:])  # Making prediction based on last day info
@@ -536,7 +559,6 @@ class predict_(object):
             model_times.append(elapsed) 
         else:
             print(f'Could not find {save_name}...\nCreating new model for future usage...')
-            import math
             model_names = []
             scores = []
             r2s = []
@@ -559,6 +581,8 @@ class predict_(object):
                 print('Xtrain=%d, Xtest=%d' % (len(X_train), len(X_test)))
                 print('ytrain=%d, ytest=%d' % (len(y_train), len(y_test)))
                 
+                if X_train.isnull().sum().sum() > 0:
+                    X_train.fillna(0, axis=1, inplace=True)
                 linear.fit(X_train, y_train)
 
                 y_pred = linear.predict(X_test)
@@ -596,12 +620,17 @@ class predict_(object):
             metrics_['Time'] = model_times
 
             # display(metrics_.head())
-            y_pred = linear.fit(train_X, train_y)predict(train_X[-1:])
+            if train_X.isnull().sum().sum() > 0:
+                train_X.fillna(0, axis=1, inplace=True)
+            linear.fit(train_X,train_y)
+            y_pred = linear.predict(train_X[-1:])
             model_preds.append(y_pred[-1])
 
-            filename = f'/data/models/{save_name}.p'
+
+            # saving data
+            filename = f'{name}-{save_name}.p'
             pickle.dump(linear, open(filename, 'wb'))
-            metrics_.to_pickle(f'/data/models/{save_name}-metrics.p')
+            metrics_.to_pickle(f'{save_name}-metrics.p')
 
             from sklearn.metrics import mean_squared_error # Metrics for the model
             y_true = data[drop].values[-1:]
@@ -619,20 +648,22 @@ class predict_(object):
         from sklearn.linear_model import Ridge
         starting = time.time()
         model_name.append("Ridge")
-        save_name = f"{asset}-{drop[:2]}-Ridge-Model"
+        save_name = f"{drop[:2]}-Ridge-Model"
         print(save_name)
         from pathlib import Path
-        p = Path(f"/data/models/{save_name}.p")
+        p = Path(f"{save_name}.p")
         
         if p.exists() and j==0: 
             print(f'Loading{save_name}...')
-            ridge = pickle.load( open(f"/data/models/{save_name}.p", "rb" ) )
+            ridge = pickle.load( open(f"{save_name}.p", "rb" ) )
+            if train_X.isnull().sum().sum() > 0:
+                train_X.fillna(0, axis=1, inplace=True)
             ridge.fit(train_X, train_y)
 
             y_pred = ridge.predict(train_X[-1:])  # Making prediction based on last day info
             model_preds.append(y_pred[-1])
             
-            filename = f'/data/models/{save_name}.p'
+            filename = f'{save_name}.p'
             pickle.dump(ridge, open(filename, 'wb'))
             
             from sklearn.metrics import mean_squared_error # Metrics for the model
@@ -648,7 +679,9 @@ class predict_(object):
             model_times.append(elapsed)  
         elif p.exists() and j>0:
             print(f'Loading{save_name}...')
-            ridge = pickle.load( open(f"/data/models/{save_name}.p", "rb" ) )
+            ridge = pickle.load( open(f"{save_name}.p", "rb" ) )
+            if train_X.isnull().sum().sum() > 0:
+                train_X.fillna(0, axis=1, inplace=True)
             ridge.fit(train_X, train_y)
 
             y_pred = ridge.predict(train_X[-1:])  # Making prediction based on last day info
@@ -689,7 +722,8 @@ class predict_(object):
 
                 print('Xtrain=%d, Xtest=%d' % (len(X_train), len(X_test)))
                 print('ytrain=%d, ytest=%d' % (len(y_train), len(y_test)))
-                
+                if X_train.isnull().sum().sum() > 0:
+                    X_train.fillna(0, axis=1, inplace=True)
                 ridge.fit(X_train, y_train)
 
                 y_pred = ridge.predict(X_test)
@@ -722,12 +756,16 @@ class predict_(object):
             metrics_['Time'] = model_times
 
             # display(metrics_.head())
-            y_pred = ridge.fit(train_X, train_y).predict(train_X[-1:])
+            if train_X.isnull().sum().sum() > 0:
+                train_X.fillna(0, axis=1, inplace=True)
+            ridge.fit(train_X,train_y)
+            y_pred = ridge.predict(train_X[-1:])
             model_preds.append(y_pred[-1])
 
-            filename = f'/data/models/{save_name}.p'
+            # saving data
+            filename = f'{name}-{save_name}.p'
             pickle.dump(ridge, open(filename, 'wb'))
-            metrics_.to_pickle(f'/data/models/{save_name}-metrics.p')
+            metrics_.to_pickle(f'{save_name}-metrics.p')
             from sklearn.metrics import mean_squared_error # Metrics for the model
             y_true = data[drop].values[-1:]
 
