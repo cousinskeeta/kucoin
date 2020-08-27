@@ -72,26 +72,26 @@ class predict_(object):
                     pch = 100 * ((b - a) / a )
                     resp="""
                     Price is predicted to increase over the next {} days !!! \n
-                    We forecast a {}% increase in {} from {} to {}, or ${}. URL: {}\n
-                    """.format(len(date_range), round(pch[0],2), name.split('/')[4], 
-                            round(a[0],2), round(b[0],2), round(b[0]-a[0],2), name)
+                    We forecast a {}% increase in {} from {} to {}, or ${}. URL: <a href="{}>link</a>\n
+                    """.format(len(date_range), round(pch[0],7), name.split('/')[4], 
+                            round(a[0],7), round(b[0],7), round(b[0]-a[0],7), name)
                     print("""
                     Price is predicted to increase over the next {} days !!! \n
-                    We forecast a {}% increase in {} from {} to {}, or ${}. URL: {}\n
+                    We forecast a {}% increase in {} from {} to {}, or ${}. URL: <a href="{}>link</a>\n
                     """.format(len(date_range), round(pch[0],2), name.split('/')[4], 
-                            round(a[0],2), round(b[0],2), round(b[0]-a[0],2), name))
+                            round(a[0],7), round(b[0],7), round(b[0]-a[0],7), name))
                 else:
                     pch = 100 * ((b - a) / a )
                     resp = """
                     Price is predicted to decrease over the next {} days !!! \n
-                    We forecast a {}% decrease in {} from {} to {}, or $({}). URL: {}\n
+                    We forecast a {}% decrease in {} from {} to {}, or $({}). URL: <a href="{}>link</a>\n
                     """.format(len(date_range), round(pch[0],2), name.split('/')[4], 
-                            round(a[0],2), round(b[0],2), round(b[0]-a[0],2), name)
+                            round(a[0],7), round(b[0],7), round(b[0]-a[0],7), name)
                     print("""
                     Price is predicted to decrease over the next {} days !!! \n
-                    We forecast a {}% decrease in {} from {} to {}, or $({}). URL: {}\n
+                    We forecast a {}% decrease in {} from {} to {}, or $({}). URL: <a href="{}>link</a>\n
                     """.format(len(date_range), round(pch[0],2), name.split('/')[4], 
-                            round(a[0],2), round(b[0],2), round(b[0]-a[0],2)))
+                            round(a[0],7), round(b[0],7), round(b[0]-a[0],7), name))
 
 
                 # import matplotlib.pyplot as plt
@@ -265,9 +265,10 @@ class predict_(object):
         """
         # creating datatime index
         df['Date'] = pd.to_datetime(df['Date'])  # change to sort by date, convert date to datetime format
-        df.sort_values(by='Date', inplace=True)
-        df = df.set_index('Date')      
+        df.index = pd.DatetimeIndex(df['Date'])
+        df.sort_index(ascending=True, inplace=True)  
         final = df.copy()
+        print("new index:",final.head(), final.tail())
         ## indicator features
 
         # EMA - ema(data, period=0, column='Close**')
@@ -289,25 +290,25 @@ class predict_(object):
         for i in data_.columns[11:]:
             final[f'{i}']= data_[i].bfill().values
 
-        ## Bollinger Bands
-        bitcoin_bb = bitcoin_acd
-        data_ = self.bollinger_bands(bitcoin_bb)
-        for i in data_.columns[13:]:
-            final[f'{i}']= data_[i].bfill().values
+        # ## Bollinger Bands
+        # bitcoin_bb = bitcoin_acd
+        # data_ = self.bollinger_bands(bitcoin_bb)
+        # for i in data_.columns[13:]:
+        #     final[f'{i}']= data_[i].bfill().values
 
-        ### On-balance volume
-        bitcoin_obv = bitcoin_ema
-        data_ = self.on_balance_volume(bitcoin_obv)
-        for i in data_.columns[16:]:
-            final[f'{i}']= data_[i].bfill().values
+        # ### On-balance volume
+        # bitcoin_obv = bitcoin_ema
+        # data_ = self.on_balance_volume(bitcoin_obv)
+        # for i in data_.columns[16:]:
+        #     final[f'{i}']= data_[i].bfill().values
 
-        ## Price Volume Trend
-        bitcoin_pvt = bitcoin_obv
-        data_ = self.price_volume_trend(bitcoin_pvt)
-        for i in data_.columns[18:]:
-            final[f'{i}']= data_[i].bfill().values
+        # ## Price Volume Trend
+        # bitcoin_pvt = bitcoin_obv
+        # data_ = self.price_volume_trend(bitcoin_pvt)
+        # for i in data_.columns[18:]:
+        #     final[f'{i}']= data_[i].bfill().values
 
-        e = final
+        e = final.copy()
 
         ## checking and removing Null values
         e.fillna(0,axis=1, inplace=True)
@@ -330,11 +331,14 @@ class predict_(object):
             e['Previous'+str(i)] = e[drop].shift(i).bfill()
             for j in polynomial_terms:
                 e['Previous'+str(i)+'**'+str(j)] = (e[drop].shift(i).bfill())**j
-        e.drop(drop, axis=1, inplace=True)
+        
+        e.drop([drop, 'Date'], axis=1, inplace=True)
+        
         ## Scaling features before modeling
         from sklearn.preprocessing import StandardScaler
         scalar = StandardScaler()
-        X = scalar.fit_transform(final.copy())
+        scalar.fit(e.to_numpy(copy=True, na_value=0))
+        X = scalar.transform(e)
         return X, e.columns, e.index
 
     def ensemble(self, X,y, verbose=True, data=pd.DataFrame(), drop="", asset="", j =0):
@@ -373,6 +377,10 @@ class predict_(object):
             print(f'Loading{save_name}...')
             lasso = pickle.load( open(f"{save_name}.p", "rb" ) )
             
+            print(type(train_X),train_X)
+            train_X = pd.DataFrame(train_X)
+            print("\n--------->",type(train_X),train_X.head())
+
             if train_X.isnull().sum().sum() > 0:
                 train_X.fillna(0, axis=1, inplace=True)
             lasso.fit(train_X, train_y)
@@ -399,6 +407,10 @@ class predict_(object):
         elif p.exists() and j>0:
             print(f'Loading{save_name}...')
             ridge = pickle.load( open(f"{save_name}.p", "rb" ) )
+            
+            print(type(train_X),train_X)
+            train_X = pd.DataFrame(train_X)
+            print("\n--------->",type(train_X),train_X.head())
             
             if train_X.isnull().sum().sum() > 0:
                 train_X.fillna(0, axis=1, inplace=True)
@@ -480,6 +492,9 @@ class predict_(object):
             print(metrics.head(3), metrics.tail(3))
 
             # display(metrics_.head())
+            print(type(train_X),train_X)
+            train_X = pd.DataFrame(train_X)
+            print("\n--------->",type(train_X),train_X.head())
             if train_X.isnull().sum().sum() > 0:
                 train_X.fillna(0, axis=1, inplace=True)
             lasso.fit(train_X,train_y)
@@ -487,7 +502,7 @@ class predict_(object):
             model_preds.append(y_pred[-1])
             
             # saving data
-            filename = f'{name}-{save_name}.p'
+            filename = f'{save_name}.p'
             pickle.dump(lasso, open(filename, 'wb'))
             metrics_.to_pickle(f'{save_name}-metrics.p')
             
@@ -515,6 +530,11 @@ class predict_(object):
         if p.exists() and j == 0:
             print(f'Loading{save_name}...')
             linear = pickle.load( open(f"{save_name}.p", "rb" ) )
+
+            print(type(train_X),train_X)
+            train_X = pd.DataFrame(train_X)
+            print("\n--------->",type(train_X),train_X.head())
+
             if train_X.isnull().sum().sum() > 0:
                 train_X.fillna(0, axis=1, inplace=True)
             linear.fit(train_X, train_y)
@@ -539,6 +559,11 @@ class predict_(object):
         elif p.exists() and j > 0:
             print(f'Loading{save_name}...')
             ridge = pickle.load( open(f"{save_name}.p", "rb" ) )
+
+            print(type(train_X),train_X)
+            train_X = pd.DataFrame(train_X)
+            print("\n--------->",type(train_X),train_X.head())
+
             if train_X.isnull().sum().sum() > 0:
                 train_X.fillna(0, axis=1, inplace=True)
             ridge.fit(train_X, train_y)
@@ -620,6 +645,9 @@ class predict_(object):
             metrics_['Time'] = model_times
 
             # display(metrics_.head())
+            print(type(train_X),train_X)
+            train_X = pd.DataFrame(train_X)
+            print("\n--------->",type(train_X),train_X.head())
             if train_X.isnull().sum().sum() > 0:
                 train_X.fillna(0, axis=1, inplace=True)
             linear.fit(train_X,train_y)
@@ -628,7 +656,7 @@ class predict_(object):
 
 
             # saving data
-            filename = f'{name}-{save_name}.p'
+            filename = f'{save_name}.p'
             pickle.dump(linear, open(filename, 'wb'))
             metrics_.to_pickle(f'{save_name}-metrics.p')
 
@@ -656,6 +684,10 @@ class predict_(object):
         if p.exists() and j==0: 
             print(f'Loading{save_name}...')
             ridge = pickle.load( open(f"{save_name}.p", "rb" ) )
+            print(type(train_X),train_X)
+            train_X = pd.DataFrame(train_X)
+            print("\n--------->",type(train_X),train_X.head())
+
             if train_X.isnull().sum().sum() > 0:
                 train_X.fillna(0, axis=1, inplace=True)
             ridge.fit(train_X, train_y)
@@ -680,6 +712,11 @@ class predict_(object):
         elif p.exists() and j>0:
             print(f'Loading{save_name}...')
             ridge = pickle.load( open(f"{save_name}.p", "rb" ) )
+
+            print(type(train_X),train_X)
+            train_X = pd.DataFrame(train_X)
+            print("\n--------->",type(train_X),train_X.head())
+
             if train_X.isnull().sum().sum() > 0:
                 train_X.fillna(0, axis=1, inplace=True)
             ridge.fit(train_X, train_y)
@@ -756,6 +793,9 @@ class predict_(object):
             metrics_['Time'] = model_times
 
             # display(metrics_.head())
+            print(type(train_X),train_X)
+            train_X = pd.DataFrame(train_X)
+            print("\n--------->",type(train_X),train_X.head())            
             if train_X.isnull().sum().sum() > 0:
                 train_X.fillna(0, axis=1, inplace=True)
             ridge.fit(train_X,train_y)
@@ -763,7 +803,7 @@ class predict_(object):
             model_preds.append(y_pred[-1])
 
             # saving data
-            filename = f'{name}-{save_name}.p'
+            filename = f'{save_name}.p'
             pickle.dump(ridge, open(filename, 'wb'))
             metrics_.to_pickle(f'{save_name}-metrics.p')
             from sklearn.metrics import mean_squared_error # Metrics for the model
