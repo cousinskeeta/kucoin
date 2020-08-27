@@ -334,7 +334,11 @@ class coinscrapper(object):
       self.log.append("Collecing RSI data\n")
       return x
     except:
-      return None
+      self.rsi_data.append(-1)
+      self.todays_RSI.append(-1)
+      self.todays_price.append(-1)
+      self.log.append("Error collecing RSI data\n")
+      return x
 
   def plot_rsi_data(self, data, title):
     title = title
@@ -361,27 +365,29 @@ class coinscrapper(object):
       self.pull_fundamentals()
     if len(self.todays_RSI) < 1:
       backup = [self.get_rsi_data(i) for i in self.technical_data]
-      # charts = [self.plot_rsi_data(j,k) for j,k in zip(backup,self.names)]
+      for b, n in zip(backup, self.names):
+        try:
+          b.to_csv(f"{n}-{self.today}.csv")
+        except:
+          print(f"Error saving .csv file for {n}")
+      # charts = [self.plot_rsi_data(j,k) for j,k in zip(backup, self.names)]
       # print(len(charts))
-      # # candles = [self.save_candlesticks(j,k) for j,k in zip(backup,self.names)]
+      # candles = [self.save_candlesticks(j,k) for j,k in zip(backup,self.names)]
       # for i in charts:
       #   i.show();
       #   self.plots.append(i)
       #   try:
       #     for name in self.names:
-      #       if not exists(f'/data/images/{name}/'):
-      #         mkdir(f'/data/images/{name}/')
-      #     save_plots = [i.savefig(f'/data/images/{k}/RSI-{self.today}.png', dpi=72) for k in self.names]
+      #       if not exists(f'/images/{name}/'):
+      #         mkdir(f'/images/{name}/')
+      #     save_plots = [i.savefig(f'/images/{k}/RSI-{self.today}.png', dpi=72) for k in self.names]
       #     self.plots.append(i)
       #     self.log.append(f"Saved plot data. \n")
       #   except: 
-      #     raise Exception("""Make sure you have a folder named, 'CoinScraper', and also a sub-folder named "charts\n~/content/drive/My Drive/CoinScraper/charts/""")
-      #     print('Please connect to google drive to save files.')
-      #     # self.connect_googleDrive()
       #     for name in self.names:
       #       if not exists(f'/images/{name}/'):
-      #         mkdir(f'/data/images/{name}/')
-      #     save_plots = [i.savefig(f'/data/images/{k}/RSI-{self.today}.png', dpi=72) for k in self.names]
+      #         mkdir(f'/images/{name}/')
+      #     save_plots = [i.savefig(f'/images/{k}/RSI-{self.today}.png', dpi=72) for k in self.names]
       #     self.plots.append(i)
       #     self.log.append(f"Could not save plot data. \n")
 
