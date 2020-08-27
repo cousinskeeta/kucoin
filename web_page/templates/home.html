@@ -1,41 +1,44 @@
 <html>
 	<head>
-		<script>
+		<style>
+			.no-js #loader { display: none;  }
+			.js #loader { display: block; position: absolute; left: 100px; top: 0; }
+			.se-pre-con {
+				position: fixed;
+				left: 0px;
+				top: 0px;
+				width: 100%;
+				height: 100%;
+				z-index: 9999;
+				background: url(https://thumbs.gfycat.com/FearlessSourHornet-small.gif) center no-repeat #fff;
+			}
+		</style>
+		
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.js"></script>
+
+		<!-- <script>
 			const config = {
 			  sourceAssetAddress: null,
 			  sourceAmountDecimal: null,
 			  destinationAssetAddress: null,
 			  destinationAmountDecimal: null,
 			  apiKey: null,
-			  partnerContractAddress: "0x7581d6b7d0d75d0db28094be6b5ee69e012661dd",
+			  partnerContractAddress: null,
 			};
 			const nodeId = 'totle-widget';
 			!function(){const t=document.createElement("script");t.type="text/javascript";const e=()=>{TotleWidget.default.run(config,document.getElementById(nodeId))};t.readyState?t.onreadystatechange=function(){"loaded"!=t.readyState&&"complete"!=t.readyState||(t.onreadystatechange=null,e())}:t.onload=function(){e()},t.src="https://widget.totle.com/latest/dist.js",document.getElementsByTagName("head")[0].appendChild(t)}();
-		</script>
-
-		<style>
-			/* This only works with JavaScript, 
-			if it's not present, don't show loader */
-			.no-js #loader { display: none;  }
-			.js #loader { display: block; position: absolute; left: 100px; top: 0; }
-		</style>
-
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
-		
-		<script src="https://github.com/Modernizr/Modernizr/raw/master/modernizr.js"></script>
-		<script>
+		</script> -->
+		<script>	
 			// Wait for window load
-			$(window).load(function() {
-				// Animate loader off screen
-				$("#loader").animate({
-					top: -200
-				}, 1500);
-			});
-		</script>	
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-
+				$(window).load(function() {
+					// Animate loader off screen
+					$(".se-pre-con").fadeOut("slow");;
+				});
+			</script>
 	</head>
 	<body>
+		<div class="se-pre-con"></div>
 		<h1><center>Coin RSI Scrapper - Top Picks</center></h1>
 		<br>
 		<br>
@@ -92,6 +95,15 @@
 		</center>	
 		
 		<br>
+		<script>
+			// Wait for window load
+			$(window).load(function() {
+				// Animate loader off screen
+				$("#loader").animate({
+					top: -200
+				}, 1500);
+			});
+		</script>
 	</body>
 
 </html>
