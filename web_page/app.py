@@ -73,7 +73,7 @@ def preds():
     print(res)
     preds = res[2]
     print("Predictions: ",preds)
-    tables_ = [res[0].head().to_html(classes='data', header="true")]
+    tables_ = [res[0].tail(7).to_html(classes='data', header="true")]
     print("Table: ", tables_)
     return render_template('home.html', date=date, top10="Here is our prediction:",preds=preds, assets="Here a table:\n",tables=tables_ )
 
