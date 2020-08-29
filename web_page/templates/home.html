@@ -1,4 +1,6 @@
-<html>
+
+<!doctype html>
+<html lang="en">
 	<head>
 		<style>
 			.no-js #loader { display: none;  }
@@ -12,6 +14,49 @@
 				z-index: 9999;
 				background: url(https://thumbs.gfycat.com/FearlessSourHornet-small.gif) center no-repeat #fff;
 			}
+			table, th, td {
+				border: 1px solid blue;
+				width: 50%;
+				height: 50px;
+				text-align: left;
+				font-size: 1.6em;
+				}
+			td {
+				height: 50px;
+				vertical-align: bottom;
+				padding: 15px;
+				}
+			th, td {
+				border-bottom: 1px solid #ddd;
+			}
+			tr:hover {background-color: #e27e7e;}
+			th {
+				background-color: blue;
+				color: white;
+				}
+			.results {
+				width: auto%;
+				padding: 10px;
+				border: 5px solid gray;
+				margin: 0;
+				align-content: center;
+				font-size: 1.6em;
+				}
+			.button {
+				background-color: blue; /* Blue */
+				border: none;
+				color: white;
+				padding: 15px 32px;
+				text-align: center;
+				text-decoration: none;
+				display: inline-block;
+				font-size: 16px;
+				}
+			h1 {
+				text-align: center;
+				font-size: 64px;
+				color: black;
+}
 		</style>
 		
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
@@ -35,66 +80,7 @@
 					// Animate loader off screen
 					$(".se-pre-con").fadeOut("slow");;
 				});
-			</script>
-	</head>
-	<body>
-		<div class="se-pre-con"></div>
-		<h1><center>Coin RSI Scrapper - Top Picks</center></h1>
-		<br>
-		<br>
-		<form action="{{ url_for('scrape_coins') }}" method="post">
-			<center><h3> Click to view saved ranks </h3></center>
-				<br>
-			<center><button id="run"> Run </button></center>
-		</form>
-		<form action="{{ url_for('update') }}" method="post">
-			<center><h3> Click to update ranks </h3>
-			This will take about 30 minutes to connect</center>
-				<br>
-			<center><button id="update"> Update </button></center>
-		</form>
-		<br>
-		<center><h2> You can swap some crypto tokens while you wait!</h2></center>
-		<br>
-		<center>
-			<div id='totle-widget'></div>
-		</center>
-		<br>
-		<center><h3> <span id='top10'> {{top10}}</span></h3></center>
-		<center><h4><span id='date'>{{date}}</span></h4></center>
-		<br>
-		<center>
-			{% for tab in table %}
-				{{ tab|safe }}
-			{% endfor %}
-		</center>
-
-		<br>
-		<form action="{{ url_for('preds') }}" method="post">
-			<center><h3> Enter URL of historic data for predictions: </h3></center>
-			<center><input type="text" id="url" name="url"></center>
-				<br>
-			<center><button id="preds"> Predict </button></center>
-		</form>
-		<br>
-		<center>
-				{{ preds }}
-		</center>
-		<br>
-		<center><h3> <span id= 'all'>{{assets}}</span></h3></center>
-		<center><h4><span id='date'>{{date}}</span></h4></center>
-		<center>
-			{% for tab in tables %}
-				{{ tab|safe }}
-			{% endfor %}
-		</center>		
-		<center>
-			{% for tab in tables_ %}
-				{{ tab }}
-			{% endfor %}
-		</center>	
-		
-		<br>
+		</script>
 		<script>
 			// Wait for window load
 			$(window).load(function() {
@@ -104,6 +90,91 @@
 				}, 1500);
 			});
 		</script>
+	</head>
+	<body>
+	<center>
+		<div class="se-pre-con"></div>
+
+		<center><h1>Coin RSI Scrapper - Top Picks</h1></center>
+			<br>
+			<br>
+
+			
+			<div class="results" id="form_button">
+				<form action="{{ url_for('scrape_coins') }}" method="post">
+					<center><h3> Click 'Run' to view our saved ranks </h3></center>
+					<br>
+					<center><button class="button" id="run"> Run </button></center>
+				</form>
+			</div>
+		</center>
+		<!-- <form action="{{ url_for('update') }}" method="post">
+			<center><h3> Click to update ranks </h3>
+			This will take about 30 minutes to connect</center>
+				<br>
+			<center><button class="button" id="update"> Update </button></center>
+		</form> -->
+		<!-- <br>
+		<center><h2> You can swap some crypto tokens while you wait!</h2></center>
+		<br>
+		<center>
+			<div id='totle-widget'></div>
+		</center> -->
+		<br>
+	<center>
+		<div class="results" id="results_">
+			<center><h3> <span id='top10'> {{top10}}</span></h3></center>
+			<br>
+			<center><h4><span id='date'>{{date}}</span></h4></center>
+		</div> 
+	</center>
+		<br>
+			<center>
+				{% for tab in table %}
+					{{ tab|safe }}
+				{% endfor %}
+			</center>
+		<br>
+	<center>
+		<div class="results" id="2nd_form">
+			<form action="{{ url_for('preds') }}" method="post">
+				<center><h3> Enter URL of historic data for predictions: </h3></center>
+				<center><input type="text" id="url" name="url"></center>
+				<br>
+				<center><button class="button" id="preds"> Predict </button></center>
+			</form>
+		</div>
+	</center>
+		<br>
+		<center>
+		<div class= "results" style="overflow-x:auto; font-size: 1.6em;">
+			
+					<br>
+				{% for pred in preds %}
+					<div> {{ pred }}</div>
+					<br>
+				{% endfor %}
+		</div>
+	</center>
+	<center>
+		<div class="results" id="results_2">
+			<br>
+			<center><h3> <span id= 'all'>{{assets}}</span></h3></center>
+			<center><h4><span id='date'>{{date}}</span></h4></center>
+		</div>
+	</center>
+			<center>
+				{% for tab in tables %}
+					{{ tab|safe }}
+				{% endfor %}
+			</center>	
+			<center>
+				{% for tab in tables_ %}
+					{{ tab }}
+				{% endfor %}
+			</center>	
+		<br>
+
 	</body>
 
 </html>
