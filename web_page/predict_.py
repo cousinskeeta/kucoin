@@ -56,6 +56,7 @@ class predict_(object):
             dff.sort_values(by='Date', inplace=True)
             new = self.predict(dff, verbose = verbose, targets=targets, asset=name, j=i) 
             new['Date'] = pd.to_datetime(date_range[i])
+            print("results", new.shape, new)
             forecasts.append(new['Close**'])
             da = pd.concat([dff, new])
             da.reset_index(inplace=True)
@@ -70,11 +71,9 @@ class predict_(object):
 
                 if b > a:
                     pch = 100 * ((b - a) / a )
-                    resp="""
-                    Price is predicted to increase over the next {} days !!! \n
-                    We forecast a {}% increase in {} from {} to {}, or ${}. URL: <a href="{}>link</a>\n
-                    """.format(len(date_range), round(pch[0],7), name.split('/')[4], 
-                            round(a[0],7), round(b[0],7), round(b[0]-a[0],7), name)
+                    resp=[f"{name.split('/')[4].upper()}'s price is predicted to increase over the next {len(date_range)} days !!!\n",
+                    f"We forecast a {round(pch[0],7)}% increase in {name.split('/')[4].upper()} in a range of {round(a[0],7)} to {round(b[0],7)}, or ${round(b[0]-a[0],7)}",
+                    f"{name}"]
                     print("""
                     Price is predicted to increase over the next {} days !!! \n
                     We forecast a {}% increase in {} from {} to {}, or ${}. URL: <a href="{}>link</a>\n
@@ -82,11 +81,9 @@ class predict_(object):
                             round(a[0],7), round(b[0],7), round(b[0]-a[0],7), name))
                 else:
                     pch = 100 * ((b - a) / a )
-                    resp = """
-                    Price is predicted to decrease over the next {} days !!! \n
-                    We forecast a {}% decrease in {} from {} to {}, or $({}). URL: <a href="{}>link</a>\n
-                    """.format(len(date_range), round(pch[0],2), name.split('/')[4], 
-                            round(a[0],7), round(b[0],7), round(b[0]-a[0],7), name)
+                    resp=[f"{name.split('/')[4].upper()}'s price is predicted to decrease over the next {len(date_range)} days !!!\n",
+                    f"We forecast a {round(pch[0],7)}% decrease in {name.split('/')[4].upper()} in a range of {round(a[0],7)} to {round(b[0],7)}, or $({round(b[0]-a[0],7)})",
+                    f"{name}"]
                     print("""
                     Price is predicted to decrease over the next {} days !!! \n
                     We forecast a {}% decrease in {} from {} to {}, or $({}). URL: <a href="{}>link</a>\n
