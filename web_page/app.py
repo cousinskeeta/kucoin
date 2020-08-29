@@ -43,18 +43,18 @@ def home():
 @app.route('/scrape_coins', methods=['GET','POST'])
 def scrape_coins():
 	date = now
-	table = [summary.head(10).to_html(classes='data', header="true")]
-	tables = [summary.to_html(classes='data', header="true")]
+	table = [summary.head(10).to_html(classes='saved', header="true")]
+	tables = [summary.to_html(classes='saved', header="true")]
 
-	return render_template('home.html', date=date, 
-    top10="Here are our top 10 picks for:\n",table=table, 
+	return render_template('home.html', date="2020-08-20", 
+    top10="Here are our top 10 picks from:\n",table=table, 
     assets="Here all the assets we assessed:\n",tables=tables )
 
 @app.route('/update', methods=['GET','POST'])
 def update():
     updated = client.summary()
     date = now
-    updated.sort_values('RSI').to_csv(f'summary-{now}.csv')
+    updated.sort_values('RSI').to_csv('summary-{}.csv'.format(now))
     table = [updated.head().to_html(classes='data', header="true")]
     tables = [updated.to_html(classes='data', header="true")]
     return render_template('home.html', date=date, 
@@ -73,7 +73,7 @@ def preds():
     print(res)
     preds = res[2]
     print("Predictions: ",preds)
-    tables_ = [res[0].tail(7).to_html(classes='data', header="true")]
+    tables_ = [res[0].tail(7).to_html(classes='preds', header="true")]
     print("Table: ", tables_)
     return render_template('home.html', date=date, top10="Here is our prediction:",preds=preds, assets="Here a table:\n",tables=tables_ )
 
